@@ -8,6 +8,7 @@ setup(
     install_requires=[
         'prompt-toolkit',
         'pandas',
+        'click',
     ],
     entry_points={
         'console_scripts': [
