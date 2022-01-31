@@ -33,7 +33,7 @@ class BasePanda(object):
             try:
                 self.original_frame = pd.read_csv(data, index_col=0) # should make index_col optional
             except:
-                print('csv data not loaded properly')
+                print('csv data not loaded properly, try adjusting delimeters')
 
         else:
             self.original_frame = pd.DataFrame(data)

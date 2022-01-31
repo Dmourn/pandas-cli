@@ -5,7 +5,8 @@ A command line interface for manipulating dataframes in python pandas.
 
 
 ## Visuals
-asciinema is the way, but for now screenshots.
+why check if the link works when you can just commit?
+[]! (images/rec1.webm)
 
 ## Installation
 
