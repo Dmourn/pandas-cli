@@ -5,7 +5,7 @@ A command line interface for manipulating dataframes in python pandas.
 
 
 ## Visuals
-![](https://github.com/Dmourn/pandas-cli/images/out.gif)
+![](images/out.gif)
 
 ## Installation
 
