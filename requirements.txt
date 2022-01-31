@@ -1,0 +1,5 @@
+## I want the latest. can't decide if I want click or not but for now you need it.
+pandas
+click
+prompt-toolkit
+openpyxl
