@@ -5,8 +5,7 @@ A command line interface for manipulating dataframes in python pandas.
 
 
 ## Visuals
-why check if the link works when you can just commit?
-[]! (images/rec1.webm)
+![] (images/out.gif)
 
 ## Installation
 
