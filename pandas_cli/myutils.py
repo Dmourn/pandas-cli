@@ -103,159 +103,94 @@ def show_choices(adict,once=False,msg='a key to examine',getvals=False,color1='y
             click.clear()
             click.secho(f'Select a valid choice:{x} not valid',bg='bright_red',fg='black')
 
+
+# Was going to get rid of click but didn't realize it was a dependency for prompt_toolkit
 #Same as above, but with no click
-#show_choices breaks with Class, multiple 'getvals' not sure how
-class BaseUtils:
-    def zl(adict: dict):
-        #return zip([str(x) for x in range(len(y))],y)
-        return zip(list(adict.keys()),list(adict.values()))
-
-    #makes a dictionary with string intgers to make click happy
-    def zd(y,getvals=False):
-        int_dict=dict()
-        if type(y)==list:
-            for i,j in zip(range(len(y)),y):
-                int_dict[str(i)]=j
-            return int_dict
-        elif type(y)==dict:
-            if getvals:
-                for i,j in zip(range(len(list(y.values()))),list(y.values())):
-                    int_dict[str(i)]=j
-                return int_dict
-            else:
-                for i,j in zip(range(len(list(y.keys()))),list(y.keys())):
-                    int_dict[str(i)]=j
-                return int_dict
-
-    OPTIONS={'x':'exit','s':'save'}
-
-    """
-    def show_choices(self, adict,once=False,msg='a key to examine',getvals=False,color1='yellow',color2='black',color3='blue',color4='black',color5='green', options=OPTIONS):
-
-        if getvals:
-            int_dict=self.zd(adict,getvals=True)
-        else:
-            int_dict=self.zd(adict)
-
-        running=True
-        sel_list=[]
-
-        while running:
-
-            #we pop out the values from int_dict so this triggers when
-            #nothing is left to select
-            if len(int_dict)==0:
-                print("ALL DONE")
-                running=False
-                return sel_list
-
-            for i,j in self.zl(int_dict):
-                str_a=str(i)
-                str_b=str(':')
-                try:
-                    str_c=str(j.name)
-                except AttributeError:
-                    str_c=str(j)
-                    if DEBUGGING:
-                        pass
-                finally:
-                    try:
-                        print(str_a+str_b+str_c)
-                    except UnboundLocalError:
-                        print(str_a+str_b+str_c)
-
-            for i,j in self.zl(options):
-                print(f'{i}:{j}')
-
-            x=input(f'Select {msg}: ')
-
-            if x=='x' or x=='X':
-                print("Exiting")
-                running=False
-                return sel_list
-
-            elif x=='s' or x=='S':
-                print('saving choices')
-                return sel_list
-
-            try:
-                sel=int_dict[x]
-                if once==True:
-                    return sel
-                if type(adict) == list:
-                    sel_list.append(sel)
-                    del int_dict[x]
-                    if running==False:
-                        return sel_list
-                else:
-                    sel_list.append(sel)
-                    del int_dict[x]
-                    if running==False:
-                        return sel_list
-            except KeyError:
-                print(f'Select a valid choice:{x} not valid')
-    """
-    def show_choices( adict,once=False,msg='a key to examine',getvals=False,color1='yellow',color2='black',color3='blue',color4='black',color5='green', options=OPTIONS):
-
-        if getvals:
-            int_dict=zd(adict,getvals=True)
-        else:
-            int_dict=zd(adict)
-
-        running=True
-        sel_list=[]
-
-        while running:
-
-            #we pop out the values from int_dict so this triggers when
-            #nothing is left to select
-            if len(int_dict)==0:
-                print("ALL DONE")
-                running=False
-                return sel_list
-
-            for i,j in zl(int_dict):
-                str_a=str(i)
-                str_b=str(':')
-                try:
-                    str_c=str(j.name)
-                except AttributeError:
-                    str_c=str(j)
-                    if DEBUGGING:
-                        pass
-                finally:
-                    try:
-                        print(str_a+str_b+str_c)
-                    except UnboundLocalError:
-                        print(str_a+str_b+str_c)
-
-            for i,j in zl(options):
-                print(f'{i}:{j}')
-
-            x=input(f'Select {msg}: ')
-
-            if x=='x' or x=='X':
-                print("Exiting")
-                running=False
-                return sel_list
-
-            elif x=='s' or x=='S':
-                print('saving choices')
-                return sel_list
-
-            try:
-                sel=int_dict[x]
-                if once==True:
-                    return sel
-                if type(adict) == list:
-                    sel_list.append(sel)
-                    del int_dict[x]
-                    if running==False:
-                        return sel_list
-                else:
-                    sel_list.append(sel)
-                    del int_dict[x]
-                    if running==False:
-                        return sel_list
-            except KeyError:
-                print(f'Select a valid choice:{x} not valid')
+#class BaseUtils:
+#    def zl(adict: dict):
+#        #return zip([str(x) for x in range(len(y))],y)
+#        return zip(list(adict.keys()),list(adict.values()))
+#
+#    #makes a dictionary with string intgers to make click happy
+#    def zd(y,getvals=False):
+#        int_dict=dict()
+#        if type(y)==list:
+#            for i,j in zip(range(len(y)),y):
+#                int_dict[str(i)]=j
+#            return int_dict
+#        elif type(y)==dict:
+#            if getvals:
+#                for i,j in zip(range(len(list(y.values()))),list(y.values())):
+#                    int_dict[str(i)]=j
+#                return int_dict
+#            else:
+#                for i,j in zip(range(len(list(y.keys()))),list(y.keys())):
+#                    int_dict[str(i)]=j
+#                return int_dict
+#
+#    OPTIONS={'x':'exit','s':'save'}
+#
+#    def show_choices( adict,once=False,msg='a key to examine',getvals=False,color1='yellow',color2='black',color3='blue',color4='black',color5='green', options=OPTIONS):
+#
+#        if getvals:
+#            int_dict=zd(adict,getvals=True)
+#        else:
+#            int_dict=zd(adict)
+#
+#        running=True
+#        sel_list=[]
+#
+#        while running:
+#
+#            #we pop out the values from int_dict so this triggers when
+#            #nothing is left to select
+#            if len(int_dict)==0:
+#                print("ALL DONE")
+#                running=False
+#                return sel_list
+#
+#            for i,j in zl(int_dict):
+#                str_a=str(i)
+#                str_b=str(':')
+#                try:
+#                    str_c=str(j.name)
+#                except AttributeError:
+#                    str_c=str(j)
+#                    if DEBUGGING:
+#                        pass
+#                finally:
+#                    try:
+#                        print(str_a+str_b+str_c)
+#                    except UnboundLocalError:
+#                        print(str_a+str_b+str_c)
+#
+#            for i,j in zl(options):
+#                print(f'{i}:{j}')
+#
+#            x=input(f'Select {msg}: ')
+#
+#            if x=='x' or x=='X':
+#                print("Exiting")
+#                running=False
+#                return sel_list
+#
+#            elif x=='s' or x=='S':
+#                print('saving choices')
+#                return sel_list
+#
+#            try:
+#                sel=int_dict[x]
+#                if once==True:
+#                    return sel
+#                if type(adict) == list:
+#                    sel_list.append(sel)
+#                    del int_dict[x]
+#                    if running==False:
+#                        return sel_list
+#                else:
+#                    sel_list.append(sel)
+#                    del int_dict[x]
+#                    if running==False:
+#                        return sel_list
+#            except KeyError:
+#                print(f'Select a valid choice:{x} not valid')

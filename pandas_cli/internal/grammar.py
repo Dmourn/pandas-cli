@@ -24,7 +24,7 @@ def create_lexer():
         {
             "verb": "#33aa33 bold",
             "noun": "#10a0f0 bold",
-            "trailing-input": "bg:#662222 #ffffff",
+            "trailing-input": "bg:#224466 #ffffff",
         }
     )
 

@@ -1,4 +1,3 @@
-#Pick One
 #from prompt_toolkit import prompt
 from prompt_toolkit.shortcuts import prompt, clear
 
@@ -11,8 +10,6 @@ from prompt_toolkit.key_binding import KeyBindings
 #Keep this. refers to the implicit instantion of the Application class
 from prompt_toolkit.application.current import get_app
 
-#This seems like you dont get setuptools
-from pandas_cli import dpandas
 import os
 import re
 import time
@@ -26,18 +23,25 @@ from prompt_toolkit.shortcuts import CompleteStyle, ProgressBar, clear
 from prompt_toolkit.shortcuts.progress_bar import formatters
 
 import click
-#from pandasclick.BaseUtils import show
-from pandas_cli.internal import grammar
 
 from prompt_toolkit.formatted_text import ANSI
 from random import randint
 
-#Gets rid of the openpyxl message possible others lol
+#Gets rid of the openpyxl message possibly others
 import warnings
 warnings.simplefilter("ignore")
 
-DEBUG=True
+#from pandas_cli.myutils import show_choices
+
+# this syntax breaks my debugging method
+#from .myutils import show_choices
+#from .core import dpandas
+#from .internal import grammar
 from pandas_cli.myutils import show_choices
+from pandas_cli.core import dpandas
+from pandas_cli.internal import grammar
+
+DEBUG=True
 
 def rainbow(lent=6,char='🐼'):
     cl=[
@@ -53,7 +57,8 @@ def rainbow(lent=6,char='🐼'):
 def get_data_dir(adir='./data'):
     return list(os.scandir(adir))
 
-# we have this already
+# we have this already. ??? do we
+# note to self. make better comments
 def select_file(alist):
     pass
 
@@ -69,6 +74,7 @@ def random_string():
     lets = string.ascii_letters
     return ''.join([lets[random.randint(0,len(lets)-1)] for x in lets])
 
+# why are you here?
 A=dpandas.pd.DataFrame(map(lambda x: [random_string(),random_string(),random_string()],range(3)))
 
 bindings = KeyBindings()
@@ -86,7 +92,6 @@ def main():
         else:
             app.editing_mode = EditingMode.EMACS
 
-    #would be great igf this would owrk in a loop
     @bindings.add("c-c")
     @bindings.add("c-q")
     def _(event):
@@ -109,14 +114,11 @@ def main():
                         'drop', 'chcols', 'pop']
 
     dpandas_completer = WordCompleter(completion_list)
-    #dpandas_completer = WordCompleter(['exit', 'quit', 'load', 'show', 'cols', 'order', 'search', 'reset', 'save', 'sort', 'multi', 'rows', 'drop'])
     running = True
     rain = rainbow()
     while running == True:
 
-        #pstring = ANSI('\x1b[38;5;214m🐼🐼🐼🐼🐼🐼🐼🐼> ')
         pstring = ANSI(rainbow()+'> ')
-        #text = prompt(pstring, bottom_toolbar=bottom_toolbar, lexer=PygmentsLexer(PythonLexer), completer=dpandas_completer, key_bindings=bindings) 
         text = session.prompt(pstring, bottom_toolbar=bottom_toolbar, lexer=my_lexer, style=my_style, completer=dpandas_completer, key_bindings=bindings, complete_style=CompleteStyle.COLUMN) 
 
         #you did this manualy and its a shit show
@@ -124,7 +126,6 @@ def main():
         if ma:
             vl = ma.variables()
             print(vl.get('noun1'))
-            #print(vl)
 
         try:
             #spliting by whitespace
@@ -136,11 +137,11 @@ def main():
 
 
         if tl[0] == 'exit'  or tl[0] == 'quit' or tl[0] == 'q':
-            #print(dpandas_completer.words)
             print("Goodbye!") 
             running = False
             try:
-                return panda_list
+                if DEBUG:
+                    return panda_list
             except:
                 break
 
@@ -148,11 +149,10 @@ def main():
             clear()
         elif tl[0] == 'load':
             dl = os.scandir(data_dir)
-            #panda_list = [dpandas.BasePanda(abs_path=entry) for entry in dl if entry.name[-5:]=='.xlsx']
+            
             panda_list = []
             pd_str_list = []
-            #for entry in dl:
-            #    panda_list.append(dpandas.BasePanda(abs_path=entry))
+          
             custom_formatters = [
                 formatters.Label(suffix=": "),
                 formatters.Bar(start="|", end="|", sym_a="#", sym_b="#", sym_c="-"),
@@ -170,7 +170,6 @@ def main():
                 formatters.Text("  "),
             ]
 
-
             with ProgressBar(formatters=custom_formatters) as pb:
                 #for i in panda_list:
                 #print("Loading data dir")
@@ -183,7 +182,7 @@ def main():
             dpandas_completer.words += [x.__str__() for x in panda_list]
 
         #this should look for cols 
-        elif tl[0] == 'show': #  and tl[1] in pd_str_list:
+        elif tl[0] == 'show' or tl[0] == 'ls' or tl[0] == 'sh':
             count = 0
             try:
                 if len(tl)>=1 and (tl[1:]==['' for x in tl[1:]] or tl==[1]): #lol
@@ -240,27 +239,32 @@ def main():
             for i in tl[1:]:
                 for j in panda_list:
                     if i == j.__str__():
-                        count += 1
-                        starlen = 50-len(str(count))
-                        print(f'{count}'+starlen*'*')
-                        j.working_frame = j.search()
-                        j.show_me()
-                        print(50*'*')
+                        try:
+                            count += 1
+                            starlen = 50-len(str(count))
+                            print(f'{count}'+starlen*'*')
+                            j.working_frame = j.search()
+                            j.show_me()
+                            print(50*'*')
+                        except AttributeError:
+                            print("\033[91mYou may only search string data.\033[0m")
 
-        #this should be select cols
-        #this should be a part of show
         elif tl[0] == 'sel' or tl[0] == 'select':
             count = 0
-            if tl[1]=='rows':
-                print('rows not implemented yet cause strings/numbers')
+            try:
+                if tl[1]=='rows':
+                    print('rows not implemented yet cause strings/numbers')
 
-            elif tl[1]=='cols':
-                for i in tl[2:]:
-                    for j in panda_list:
-                        if i == j.__str__():
-                            count += 1
-                            j.select_cols()    
-        elif tl[0] == 'chcols': #  and tl[1] in pd_str_list:
+                elif tl[1]=='cols':
+                    for i in tl[2:]:
+                        for j in panda_list:
+                            if i == j.__str__():
+                                count += 1
+                                j.select_cols()    
+            except IndexError:
+                print('use select cols')
+
+        elif tl[0] == 'chcols':
             count = 0
             for i in tl[1:]:
                 for j in panda_list:
@@ -293,14 +297,8 @@ def main():
                             print(f'you picked {y}')
                             ext=y
                         x = input(f'Save {i} output as *.{ext}: ')
-                        #if x.rsplit('.')[1] != '.'+ext:
-                        #    file_name = x+'.'+ext
-                        #elif x[-5:] == '.'+ext:
-                        #   file_name = x
-                        #else:
                         file_name = x+'.'+ext
                         y = input('Drop index? Y/n ')
-                        #print(f'y is {y}\next is {ext}')
                         try:
                             if 'n' in y or 'N' in y:
                                 #ihatethis
@@ -326,17 +324,11 @@ def main():
                 for j in panda_list:
                     if i == j.__str__():
                         count += 1
-                        ok=j.make_mi()
-                        """
-                        x=input("Drop the data? (prettier xlsx)\n")
-                        if 'y' or 'Y' in x:
-                            #j.working_frame = j.MI
-                            pass
-                        
-                        else:
-                        """
-                        j.working_frame.index = j.MI
-                        #j.working_frame = j.MI.to_frame(index=False)
+                        try:
+                            ok=j.make_mi()
+                            j.working_frame.index = j.MI
+                        except TypeError:
+                            print("nothing happend?")
 
     
         elif tl[0] == 'drop':
@@ -364,6 +356,14 @@ def main():
                         j.pop_cols()
 
 
+        elif tl[0] == 'pager' or tl[0] == 'page':
+            count = 0
+            for i in tl[1:]:
+                for j in panda_list:
+                    if i == j.__str__():
+                        count += 1
+                        click.echo_via_pager(j.working_frame.to_string())
+            
         else:
             print(f'you said: {text} and nothing happend...\n')
     
