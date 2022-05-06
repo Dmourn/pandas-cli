@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from setuptools import setup, find_packages
 
 setup(
@@ -9,10 +11,11 @@ setup(
         'prompt-toolkit',
         'pandas',
         'click',
+        'openpyxl',
     ],
     entry_points={
         'console_scripts': [
-            'pandas-cli = pandas_cli.pdcli:main'
+            'pandas-cli = pandas_cli.main:main'
         ],
     },
 )

@@ -11,13 +11,28 @@ from prompt_toolkit.styles import Style
 This is not good but i dont want to delete it.
 """
 
-verb_list = ['exit', 'quit', 'load', 'show', 'cols', 'order', 'search', 'reset', 'save', 'sort', 'multi']
+verb_list = [
+    "exit",
+    "quit",
+    "load",
+    "show",
+    "cols",
+    "order",
+    "search",
+    "reset",
+    "save",
+    "sort",
+    "multi",
+]
+
+
 def create_grammar():
     return compile(
         r"""
         (\s* (?P<verb1>[a-z]+) \s+ (?P<noun1>[a-zA-Z0-9.]+) \s*)
     """
     )
+
 
 def create_lexer():
     example_style = Style.from_dict(
@@ -28,20 +43,20 @@ def create_lexer():
         }
     )
 
-
     g = create_grammar()
 
-    lexer = GrammarLexer(g, 
-            lexers={
+    lexer = GrammarLexer(
+        g,
+        lexers={
             "verb1": SimpleLexer("class:verb"),
             "noun1": SimpleLexer("class:noun"),
-            },
-        )
-
-    completer = GrammarCompleter(g,
-        {
-        "verb1": WordCompleter(verb_list),
         },
     )
-    return lexer,example_style, completer
 
+    completer = GrammarCompleter(
+        g,
+        {
+            "verb1": WordCompleter(verb_list),
+        },
+    )
+    return lexer, example_style, completer
