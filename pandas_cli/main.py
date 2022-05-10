@@ -85,9 +85,9 @@ def random_string():
     return "".join([lets[random.randint(0, len(lets) - 1)] for x in lets])
 
 
-def selector(panda_item, once: bool):
+def selector(panda_item, once: bool, msg="a thing"):
     col_dict = myutils.zd(panda_item)
-    selected = show_choices(col_dict, once=once)
+    selected = show_choices(col_dict, once=once, msg=msg)
     return selected
 
 
@@ -106,7 +106,6 @@ def main():
     @bindings.add("f4")
     def _(event):
         app = event.app
-        "Toggle between Emacs and Vi mode."
         if app.editing_mode == EditingMode.EMACS:
             app.editing_mode = EditingMode.VI
         else:
@@ -158,6 +157,7 @@ def main():
 
     while running == True:
 
+        # TODO figure out why moving this causes infinite loop on load
         pstring = ANSI(rainbow() + "> ")
         text = session.prompt(
             pstring,
@@ -170,7 +170,6 @@ def main():
         )
 
         seperator = 50 * "*"
-
         # you did this manualy and its a shit show
         matched = gr.match(text)
         if matched:
@@ -247,16 +246,20 @@ def main():
                         for j in panda_list:
                             if i == j.__str__():
                                 count += 1
-                                j.show_a_column()
+                                #j.show_a_column()
+                                selected=selector(j.cols, once=True, msg="a column to show")
+                                j.show_a_column(selected)
+                                
                 else:
                     for i in tl[1:]:
                         for j in panda_list:
                             if i == j.__str__():
                                 count += 1
-                                starlen = 50 - len(str(count))
-                                print(f"{count}" + starlen * "*")
+                                # starlen = 50 - len(str(count))
+                                # print(f"{count}" + starlen * "*")
+                                print(seperator)
                                 j.show_me()
-                                print(50 * "*")
+                                print(seperator)
             except:
                 print("Something whent wrong, did you load first?")
 
@@ -348,9 +351,9 @@ def main():
                         drop_index = input("Drop index? Y/n ")
 
                         try:
+                            # TODO put this functionality in dpandas
+                            # i.e. j.save(fmt, drop_index: bool)
                             if "n" in drop_index or "N" in drop_index:
-                                # put this functionality in dpandas
-                                # i.e. j.save(fmt, drop_index: bool)
                                 if ext == "xlsx":
                                     j.working_frame.to_excel(file_name)
                                 if ext == "csv":
@@ -376,12 +379,7 @@ def main():
                     if i == j.__str__():
                         count += 1
                         try:
-
-                            col_dict = myutils.zd(j.cols)
-                            selected = show_choices(col_dict)
-
-                            j.make_mi(selected)
-                            j.working_frame.index = j.multi_index
+                            j.make_mi(selector(j.cols, once=False))
                         except TypeError:
                             print("nothing happend?")
 
@@ -393,14 +391,25 @@ def main():
                         for j in panda_list:
                             if i == j.__str__():
                                 count += 1
-                                j.drop_rows()
+                                selected = selector(
+                                    [str(x) for x in j.rows], once=False
+                                )
+                                usr_input = input(
+                                    "Reset index? Y/n, careful if you don't have integer index: "
+                                )
+                                # TODO change this awful shit
+                                try:
+                                    j.drop_rows([int(x) for x in selected], usr_input)
+                                except:
+                                    j.drop_rows(selected, usr_input)
 
                 elif tl[1] == "cols":
                     for i in tl[2:]:
                         for j in panda_list:
                             if i == j.__str__():
                                 count += 1
-                                j.drop_cols()
+                                selected = selector(j.cols, once=False)
+                                j.drop_cols(selected)
             except IndexError:
                 print("You must specify what to drop")
 
@@ -426,7 +435,8 @@ def main():
 
 if __name__ == "__main__":
     panda_list = main()
-    try:
-        a, b, c, d = panda_list
-    except ValueError:
-        pass
+    if DEBUG:
+        try:
+            a = [x for x in panda_list if x.__str__() == "animals.csv"][0]
+        except IndexError:
+            pass

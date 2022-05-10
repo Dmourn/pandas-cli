@@ -12,8 +12,12 @@ CONT_CMD=docker
 test-container:
 	${CONT_CMD} build -t panda-test .
 
-.PHONY: run
-run:
+.PHONY: run-container
+run-container:
 	${CONT_CMD} run -it --rm panda-test:latest
-clean:
+
+clean-container:
 	${CONT_CMD} system prune
+
+clean-nox:
+	rm -rfv ./.nox

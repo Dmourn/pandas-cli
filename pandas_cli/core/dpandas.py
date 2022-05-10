@@ -44,6 +44,7 @@ class BasePanda:
 
         self.working_frame = self.original_frame.copy()
         self.cols = self.get_wk_cols()
+        self.rows = self.get_wk_rows()
         self.og_cols = self.original_frame.columns.to_list()
         self.multi_index = None
 
@@ -56,6 +57,22 @@ class BasePanda:
         reset the working frame to the original
         """
         self.working_frame = self.original_frame.copy()
+
+    def get_wk_cols(self):
+        """
+        Get columns from the working frame
+        """
+        self.cols = self.working_frame.columns.to_list()
+        # return self.working_frame.columns.to_list()
+        return self.cols
+
+    def get_wk_rows(self):
+        """
+        Get rows from the working frame as string
+        """
+        # self.rows = [str(x) for x in self.working_frame.index.to_list()]
+        self.rows = self.working_frame.index.to_list()
+        return self.rows
 
     def show_me(self):
         """
@@ -70,34 +87,24 @@ class BasePanda:
         self.working_frame = self.original_frame[selected]
         return self.working_frame[selected]
 
-    def get_wk_cols(self):
-        """
-        get columns from working frame
-        in use?
-        """
-        self.cols = self.working_frame.columns.to_list()
-        return self.working_frame.columns.to_list()
-
-    def make_mi(self, selected):
+    def make_mi(self, selected: list):
         """
         Makes a multi-index.
         """
         for i in selected:
             print(self.working_frame[i].dtype)
-
         try:
             self.multi_index = pd.MultiIndex.from_frame(self.working_frame[selected])
-
         except TypeError:
             # Force to string
             self.multi_index = pd.MultiIndex.from_frame(
                 self.working_frame[selected].astype(str)
             )
-
+            # self.working_frame.index = self.multi_index
         except ValueError:
             print("Type not supported nothing changed")
-
-        return self.multi_index
+        finally:
+            self.working_frame.index = self.multi_index
 
     def sort(self, selected: list):
         """
@@ -108,7 +115,7 @@ class BasePanda:
         except:
             print("Something went wrong")
 
-    # selected is a single entry if once==True
+    # TODO move this out
     def sort_mi(self):
         selected = show_choices(
             list(self.multi_index.names),
@@ -121,6 +128,7 @@ class BasePanda:
         except:
             print("Something went wrong")
 
+    # TODO move this out
     def swap_mi(self):
         """
         swap levels in multi-index
@@ -132,6 +140,7 @@ class BasePanda:
             except:
                 print("swap_mi failed. only 2 cols please. needs multi_index")
 
+    # TODO move this out
     def search(self):
 
         """This will search the values in a column for the string entered on the cli"""
@@ -157,6 +166,7 @@ class BasePanda:
             print("The data should be string. The handling of Nan's could be better")
         return df_new
 
+    # TODO move this out
     def auto_search(self, term, col):
         """
         same as search but with data already supplied
@@ -175,23 +185,27 @@ class BasePanda:
         except ValueError:
             print("The data could be better. The handling of Nan's could be better")
 
-    def drop_rows(self):
+    def drop_rows(self, selected: list, usr_input):
         """
-        This is not being used?
+        Does this work?
+        """
         """
         selected = show_choices(self.get_wk_rows(), msg="rows to drop", once=False)
-        self.working_frame.drop(selected, axis=0, inplace=True)
         usr_input = input("Reset index? Y/n, careful if you don't have integer index")
-        if "n" not in usr_input or "N" not in usr_input:
+        """
+        self.working_frame.drop(selected, axis=0, inplace=True)
+        # if "n" not in usr_input or "N" not in usr_input:
+        if usr_input.count("y") > 0 or usr_input.count("Y"):
             self.working_frame.reset_index(drop=True, inplace=True)
 
-    def drop_cols(self):
+    def drop_cols(self, selected):
         """
-        This is not being used?
+        Drop columns :)
         """
-        selected = show_choices(self.get_wk_cols(), msg="columns to drop", once=False)
         self.working_frame.drop(selected, axis=1, inplace=True)
 
+    # TODO move this out
+    # TODO This had a specific use case with hence the default pat. make it general and apply to the panda
     def split(self, pat="\n\n"):
         """
         string to list
@@ -201,6 +215,7 @@ class BasePanda:
         split_list = self.working_frame[selected].str.split(pat=pat)
         return split_list
 
+    # TODO move this out
     def explode(self):
         """
         this does nothing. should explode the dataframe
@@ -212,6 +227,8 @@ class BasePanda:
         # B=self.working_frame.copy()
 
     # takes a row and makes it the column header
+    # TODO move this out
+    # TODO figure out how to represent this in the repl
     def pop_cols(self):
         selected = show_choices(
             self.get_wk_rows(), msg="row to replace columns", once=True
@@ -225,12 +242,11 @@ class BasePanda:
         """
         self.working_frame = self.working_frame.T
 
-    def show_a_column(self):
-        # selected=show_choices(self.get_wk_cols(), msg='Select a column',once=True)
-        selected = show_choices(
-            self.get_wk_cols(),
-            msg="Select a column",
-        )
+    # TODO move this out
+    def show_a_column(self, selected):
+        """
+        Show a column without affecting the working frame
+        """
         print(self.working_frame[selected])
 
     def __str__(self):

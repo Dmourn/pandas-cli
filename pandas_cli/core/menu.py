@@ -2,6 +2,8 @@ import click
 from pandasclick.myutils import zd, show_choices
 from pandasclick.dpandas import BasePanda
 
+# TODO figure out what you wanted to do here :)
+# TODO write better comments
 # gets obj dicts with keys:
 # datadir', 'ftype', 'abs_path_selected', 'pandas_objs'
 

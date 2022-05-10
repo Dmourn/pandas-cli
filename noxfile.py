@@ -6,6 +6,5 @@ nox.options.sessions = ["test"]
 def test(session):
     session.install("-rrequirements.txt")
     session.install("-rdev-requirements.txt")
-    #session.install(".")
     session.install(".")
     session.run("pytest")

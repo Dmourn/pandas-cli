@@ -11,7 +11,7 @@ A command line interface for manipulating dataframes in python pandas.
 
 still a WIP.
 ```
-pip install -e . 
+pip install . 
 ```
 
 ## Usage
@@ -25,34 +25,46 @@ You can save the 'working frame' of a file as those formats as well.
 
 ```
 pandas-cli 
-
-OR 
-
-cd pandas_cli && python -im simple  
+```
+Or interact with the objects from dpandas.py
 
 ```
-
-The second option above allows you to access the list pl with all the 'dpandas' objects loaded.
-
-Once the cli is open.
+python -i pandas_cli/main.py  
 
 ```
+This allows you to access the list `pandas_list` with `a` being the object created by data/animals.csv.
+
+Once the cli is open. The first command must be `load` which loads the files in ./data (this should change)
+
+The syntax is as follows `verb [cols,rows] file.ext` with ext being the extension.
+
+For example:
+`drop cols file.csv`
+
+**Try using the tab completion :)**
+
+List of verbs (some are inactive or aliases for other verbs)
+```
+exit
+quit
 load
-
+trans
 show
-
-show file.csv
-
-drop cols file.csv
-
-sort file.csv
-
-reset file.csv
-
-save file.csv
-
+cols
+split
+select
+ls
+search
+reset
+save
+sort
+multi
+rows
+drop
+chcols
+pop
 ```
-There is tab completion for everything, but no semantics..yet.
+
 
 ## Project status
 WIP
@@ -60,15 +72,13 @@ WIP
 I used the core of this for look at string data only. So many features are lacking 
 I would like to add (i.e. Re-typing ints and float, calculations)
 
-File handling isn't great. Couldn't figure out if I want to use click or not.
-I think I will just use argparse, but for now it is a dependency.
+File handling isn't great.
 
-Right now, everything is assummed to be a string.
+Some functions assume the data are strings.
 This creates some odd behavior when comparing input to values.
 
 ```
 search file.csv
 ```
-
 Will crash if you search on an numeric column.
 

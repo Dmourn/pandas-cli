@@ -17,7 +17,4 @@ COPY ./test test
 COPY ./noxfile.py noxfile.py
 
 RUN ["bash", "-c", "source .env/bin/activate && nox "]
-RUN ["bash", "-c", "source .env/bin/activate && pip install ./"]
-# ENTRYPOINT ["bash", "-c", "source .env/bin/activate && bash -i "]
-ENTRYPOINT ["bash", "-c", "source .env/bin/activate && pandas-cli && bash -i || bash -i "]
-
+ENTRYPOINT ["bash", "-c", "source .nox/test/bin/activate && pandas-cli && bash -i || bash -i "]
