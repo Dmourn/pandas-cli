@@ -2,6 +2,7 @@ import nox
 
 nox.options.sessions = ["test"]
 
+
 @nox.session(reuse_venv=True)
 def test(session):
     session.install("-rrequirements.txt")

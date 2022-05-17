@@ -132,6 +132,16 @@ def load_animals_csv():
     return dpandas.BasePanda(abs_path=target_file), target_file
 
 
+def test_bad_file():
+    file_list = list(os.scandir("./data"))
+    try:
+        target_file = [x for x in file_list if x.name == "bad-file"][0]
+    except IndexError:
+        print("bad-file not found")
+    with pytest.raises(Exception):
+        dpandas.BasePanda(abs_path=target_file)
+
+
 # more of a reference than anything else
 def test_csv_null(csv_panda):
     # csv_panda, target_file = load_animals_csv()

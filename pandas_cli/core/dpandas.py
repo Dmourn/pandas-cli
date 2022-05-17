@@ -14,9 +14,14 @@ class BasePanda:
 
         self.abs_path = abs_path
 
+        # FIXME File handling is really damn bad
         if abs_path is not None:
-            data = self.abs_path.path
-            self.ftype = self.abs_path.name.rsplit(".")[1]
+            try:
+                data = self.abs_path.path
+                self.ftype = self.abs_path.name.rsplit(".")[1]
+            except IndexError as err:
+                self.abs_path = None
+                raise Exception(ValueError) from err
         else:
             self.ftype = ftype
 

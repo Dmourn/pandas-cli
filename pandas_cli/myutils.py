@@ -133,4 +133,3 @@ def show_choices(
                 bg="bright_red",
                 fg="black",
             )
-

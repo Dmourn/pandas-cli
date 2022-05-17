@@ -1,14 +1,10 @@
-"""
-Main repl
-"""
 import os
 import re
-import time
+import sys
+
 from random import randint
 
-from prompt_toolkit.shortcuts import prompt, clear
-
-from prompt_toolkit.lexers import PygmentsLexer
+from prompt_toolkit.shortcuts import CompleteStyle, ProgressBar, clear
 from prompt_toolkit.completion import WordCompleter
 
 from prompt_toolkit.enums import EditingMode
@@ -17,12 +13,13 @@ from prompt_toolkit.key_binding import KeyBindings
 # Keep this. refers to the implicit instantion of the Application class
 from prompt_toolkit.application.current import get_app
 
-from prompt_toolkit.application import Application
+# from prompt_toolkit.application import Application
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import InMemoryHistory
-from prompt_toolkit.auto_suggest import AutoSuggestFromHistory, ConditionalAutoSuggest
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 
-from prompt_toolkit.shortcuts import CompleteStyle, ProgressBar
+# from prompt_toolkit.auto_suggest import AutoSuggestFromHistory, ConditionalAutoSuggest
+
 from prompt_toolkit.shortcuts.progress_bar import formatters
 
 from prompt_toolkit.formatted_text import ANSI
@@ -30,79 +27,62 @@ from prompt_toolkit.formatted_text import ANSI
 import click
 
 
-# from pandas_cli.myutils import show_choices
-
-# this syntax breaks my debugging method
-# from .myutils import show_choices
-# from .core import dpandas
-# from .internal import grammar
-
-from pandas_cli.myutils import show_choices
-
 from pandas_cli import myutils
 from pandas_cli.core import dpandas
 from pandas_cli.internal import grammar
+from pandas_cli.myutils import show_choices
 
 DEBUG = True
 
 
+def get_data_dir(adir="./data"):
+    try:
+        return list(os.scandir(adir))
+    except FileNotFoundError:
+        print("./data not found. Try specifying --dir ")
+        sys.exit(1)
+
+
 def rainbow(lent=6, char="🐼"):
-    cl = [
+    """Silly prompt"""
+    color_list = [
         "\x1b[38;5;50m",
         "\x1b[38;5;100m",
         "\x1b[38;5;214m",
         "\x1b[38;5;90m",
         "\x1b[38;5;80m",
     ]
-    ol = [cl[randint(0, len(cl) - 1)] for x in range(lent)]
-    return char.join(ol)
-
-
-# should set then get an envar
-def get_data_dir(adir="./data"):
-    return list(os.scandir(adir))
-
-
-# we have this already. ??? do we
-# note to self. make better comments
-def select_file(alist):
-    pass
+    prompt_chars = [color_list[randint(0, len(color_list) - 1)] for x in range(lent)]
+    return char.join(prompt_chars)
 
 
 def bottom_toolbar():
     "Display the current input mode."
     if get_app().editing_mode == EditingMode.VI:
         return " [F4] Vi "
-    else:
-        return " [F4] Emacs "
-
-
-import string, random
-
-
-def random_string():
-    lets = string.ascii_letters
-    return "".join([lets[random.randint(0, len(lets) - 1)] for x in lets])
+    return " [F4] Emacs "
 
 
 def selector(panda_item, once: bool, msg="a thing"):
+    """Takes property of BasePanda and returns list of selection"""
     col_dict = myutils.zd(panda_item)
     selected = show_choices(col_dict, once=once, msg=msg)
     return selected
 
 
-# why are you here?
-A = dpandas.pd.DataFrame(
-    map(lambda x: [random_string(), random_string(), random_string()], range(3))
-)
-
 bindings = KeyBindings()
 
-split_input = re.compile("\W")
-clear()
+split_input = re.compile(r"\W")
 
 
-def main():
+@click.command()
+@click.option("-e", "--execute", type=str, help="execute command for testing")
+def cli(execute):
+    """
+    Main repl, currently it is doing too much
+    """
+    # clear()
+
     @bindings.add("f4")
     def _(event):
         app = event.app
@@ -120,16 +100,10 @@ def main():
 
         quit()
 
-    history = InMemoryHistory()
-    session = PromptSession(
-        history=history,
-        auto_suggest=AutoSuggestFromHistory(),
-        enable_history_search=True,
-    )
-    data_dir = "./data"
-
     my_lexer, my_style, my_completion = grammar.create_lexer()
     gr = grammar.create_grammar()
+
+    dir_list = get_data_dir()
 
     completion_list = [
         "exit",
@@ -153,50 +127,57 @@ def main():
     ]
 
     dpandas_completer = WordCompleter(completion_list)
+
+    prompt_string = ANSI(rainbow() + "> ")
+    history = InMemoryHistory()
+    session = PromptSession(
+        message=prompt_string,
+        history=history,
+        auto_suggest=AutoSuggestFromHistory(),
+        lexer=my_lexer,
+        enable_history_search=True,
+        style=my_style,
+        bottom_toolbar=bottom_toolbar,
+        completer=dpandas_completer,
+        key_bindings=bindings,
+        complete_style=CompleteStyle.COLUMN,
+    )
     running = True
 
-    while running == True:
+    while running is True:
 
-        # TODO figure out why moving this causes infinite loop on load
-        pstring = ANSI(rainbow() + "> ")
-        text = session.prompt(
-            pstring,
-            bottom_toolbar=bottom_toolbar,
-            lexer=my_lexer,
-            style=my_style,
-            completer=dpandas_completer,
-            key_bindings=bindings,
-            complete_style=CompleteStyle.COLUMN,
-        )
+        text = session.prompt()
 
         seperator = 50 * "*"
-        # you did this manualy and its a shit show
-        matched = gr.match(text)
-        if matched:
-            vl = matched.variables()
-            print(vl.get("noun1"))
 
+        # matched = gr.match(text)
+        # if matched:
+        #    vl = matched.variables()
+        #    #print(vl.get("noun1"))
+
+        # FIXME This is shit tier parsing. You are relying on the execption
         try:
             # spliting by whitespace
-            res = split_input.findall(text)
-            tl = text.split(res[0])
+            if execute:
+                print("Executing from command line")
+                res = split_input.findall(execute)
+                print(f"exec: {execute}\tres: {res}\t text:{text}\n")
+                # tl=text.split(res[0])
+                tl = [execute]
+            else:
+                print("NOT Executing from command line")
+                res = split_input.findall(text)
+                tl = text.split(res[0])
             # print(f'split: {tl}')
         except:
+            print("\033[31mtry statement failed line:190\033[0m")
             tl = [text]
 
-        if tl[0] == "exit" or tl[0] == "quit" or tl[0] == "q":
-            print("Goodbye!")
-            running = False
-            try:
-                if DEBUG:
-                    return panda_list
-            except:
-                break
-
-        elif tl[0] == "clear":
+        if tl[0] == "clear":
             clear()
+
         elif tl[0] == "load":
-            dir_list = os.scandir(data_dir)
+            # dir_list = os.scandir(data_dir)
 
             panda_list = []
             pd_str_list = []
@@ -218,13 +199,9 @@ def main():
                 formatters.Text("  "),
             ]
 
-            with ProgressBar(formatters=custom_formatters) as pb:
-                for entry in pb(
-                    dir_list, label=f"Loading data"
-                ):  # , total=len(panda_list)):
+            with ProgressBar(formatters=custom_formatters) as p_bar:
+                for entry in p_bar(dir_list, label="Loading data"):
                     panda_list.append(dpandas.BasePanda(abs_path=entry))
-                    # sleep is to avoid skipping the bar altogether
-                    # time.sleep(0.01)
                     pd_str_list.append(entry.__str__())
 
             dpandas_completer.words += [x.__str__() for x in panda_list]
@@ -246,10 +223,12 @@ def main():
                         for j in panda_list:
                             if i == j.__str__():
                                 count += 1
-                                #j.show_a_column()
-                                selected=selector(j.cols, once=True, msg="a column to show")
+                                # j.show_a_column()
+                                selected = selector(
+                                    j.cols, once=True, msg="a column to show"
+                                )
                                 j.show_a_column(selected)
-                                
+
                 else:
                     for i in tl[1:]:
                         for j in panda_list:
@@ -429,12 +408,21 @@ def main():
                         count += 1
                         click.echo_via_pager(j.working_frame.to_string())
 
+        elif tl[0] == "exit" or tl[0] == "quit" or tl[0] == "q":
+            print("Goodbye!")
+            running = False
+            try:
+                if DEBUG:
+                    return panda_list
+            except:
+                break
+
         else:
             print(f"you said: {text} and nothing happend...\n")
 
 
 if __name__ == "__main__":
-    panda_list = main()
+    panda_list = cli()
     if DEBUG:
         try:
             a = [x for x in panda_list if x.__str__() == "animals.csv"][0]
